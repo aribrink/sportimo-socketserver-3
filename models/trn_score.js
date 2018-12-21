@@ -42,59 +42,65 @@ else {
     //scoreSchema.index({ lastActive: -1 });
     scoreSchema.index({ user: 1, tournamentMatch: 1 });
 
-    scoreSchema.statics.AddPoints = function (uid, room, points, m_date, cb) {
+    scoreSchema.statics.AddPoints = function (userId, matchId, points, m_date, cb) {
 
-        return mongoose.model('trn_scores').findOneAndUpdate({ tournamentMatch: room, user_id: uid },
-            { $inc: { score: points }, match_date: m_date },
-            { upsert: true, new: true },
-            function (err, result) {
-                if (err) {
-                    console.log(err);
-                    if (cb)
-                        return cb(err, result);
-                }
+        let tournamentsInvolved = 0;
+        let user = null;
 
-                // Safe guard empty leaderboard [SPI-282]
-                if (!result.user_name) {
+        async.waterfall([
+            (cbk) => {
+                async.parallel([
+                    (innerCbk) => mongoose.models.users.findById(userId, 'client', innerCbk),
+                    (innerCbk) => mongoose.models.trn_subscriptions.find({ user: userId, state: 'active' }, innerCbk)
+                ], cbk);
+            },
+            (parallelResults, cbk) => {
+                user = parallelResults[0];
+                const subscriptions = parallelResults[1];
 
-                    mongoose.model('users').findById(uid, function (err, user) {
-                        if (err) {
-                            console.error(err.stack);
-                            if (cb)
-                                return cb(err, result);
-                        }
-                        else
-                            if (!user) {
-                                console.error('Failed to locate user ' + uid + ' in order to update its score in match id ' + room);
-                                if (cb)
-                                    return cb(err, result);
+                if (!user || subscriptions.length === 0)
+                    return cbk(null);
+
+                const tournamentIds = _.map(subscriptions, 'tournament');
+                mongoose.model('trn_matches').find({ client: user.client, tournament: { $in: tournamentIds }, match: matchId }, cbk);
+            },
+            (trnMatches, cbk) => {
+                if (!trnMatches || trnMatches.length === 0)
+                    return cbk(null);
+
+                tournamentsInvolved = trnMatches.length;
+
+                async.each(trnMatches, (trnMatch, matchCbk) => {
+                    mongoose.model('trn_scores').findOneAndUpdate(
+                        {
+                            user_id: userId,
+                            client: trnMatch.client,
+                            tournament: trnMatch.tournament,
+                            tournamentMatch: trnMatch.id,
+                            game_id: matchId
+                        },
+                        { 
+                            $set: {
+                                user_id: userId,
+                                client: trnMatch.client,
+                                tournament: trnMatch.tournament,
+                                tournamentMatch: trnMatch.id,
+                                game_id: matchId,
+                                pic: user.picture,
+                                user_name: user.username,
+                                country: user.country,
+                                level: user.level,
+                                match_date: m_date
+                            },
+                            $inc: {
+                                score: points
                             }
-                            else {
-                                var score = {
-                                    user_name: user.username
-                                };
-
-                                if (user) {
-                                    mongoose.model('trn_scores').findOneAndUpdate({ tournamentMatch: room, user_id: uid },
-                                        score,
-                                        { upsert: true, safe: true, new: true },
-                                        function (err, result) {
-                                            console.log("Updated erroneus leaderboard entry for: " + uid);
-                                            if (cb)
-                                                return cb(err, result);
-                                        }
-                                    );
-                                }
-                            }
-
-                    });
-                }
-                else {
-                    if (cb)
-                        return cb(err, result);
-                }
-
-            });
+                        },
+                        { upsert: true, new: true },
+                        matchCbk);
+                }, cbk);
+            }
+        ], cb);
     };
 
     // Internal method used by sockets subscribe
@@ -148,7 +154,6 @@ else {
                         },
                         { upsert: true },
                         matchCbk);
-
                 }, cbk);
             }
         ], cb);
