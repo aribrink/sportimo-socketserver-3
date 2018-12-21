@@ -59,3 +59,11 @@ typings/
 
 # next.js build output
 .next
+
+# visual studio project files
+/bin
+/obj
+/.vscode
+.sln
+.suo
+.njsproj
