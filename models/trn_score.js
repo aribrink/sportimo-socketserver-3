@@ -3,7 +3,8 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     ObjectId = Schema.Types.ObjectId,
-    async = require('async');
+    async = require('async'),
+    _ = require('lodash');
 
 if (mongoose.models.trn_scores)
     module.exports = mongoose.models.trn_scores;
