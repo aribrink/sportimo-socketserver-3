@@ -530,28 +530,29 @@ function LOG(s) {
 // //----------------------------------------
 // var instUsers = [];
 
-// var DisconnectUser = function (user) {
+// Deprecated - No Need Anymore
+var DisconnectUser = function (user) {
 
-//     // Disable it for now
-//     // return;
+    // Disable it for now
+    // return;
 
-//     const json = JSON.stringify({
-//         type: "disconnect_user",
-//         client: user.uid,
-//         data: { "message": { "en": "You logged in from another device. We are sorry but you can only have one active connection." } }
-//     });
+    // const json = JSON.stringify({
+    //     type: "disconnect_user",
+    //     client: user.uid,
+    //     data: { "message": { "en": "You logged in from another device. We are sorry but you can only have one active connection." } }
+    // });
 
 
-//     if (user.wss.readyState == WebSocket.OPEN) {
-//         user.wss.send(json, function (sendError) {
-//             if (sendError) {
-//                 console.error(`Error responding on user ${user.uid} disconnection due to multiple device connections: ${sendError.stack}`);
-//             }
-//         });
-//         user.wss.close(1008, "Duplicate connection found");
-//     }
-//     removeUser(user);
-// };
+    // if (user.wss.readyState == WebSocket.OPEN) {
+    //     user.wss.send(json, function (sendError) {
+    //         if (sendError) {
+    //             console.error(`Error responding on user ${user.uid} disconnection due to multiple device connections: ${sendError.stack}`);
+    //         }
+    //     });
+    //     user.wss.close(1008, "Duplicate connection found");
+    // }
+    // removeUser(user);
+};
 
 // var findUser = function (id) {
 //     return _.find(instUsers, { uid: id });
@@ -730,7 +731,7 @@ io.on('connection', (socket, req) => {
         try {
             user.room = payload.room;
             socket.join(user.room);
-            LOG(user.uid + " subscribed to:" + user.room);
+            LOG(user.uid + " with socketId:"+ user.socketId+" subscribed to:" + user.room);
 
             // Enter leaderboard entry with user data
             leaderboard.AddLeaderboardEntry(user.uid, user.room);
@@ -818,8 +819,8 @@ if (redisclient) {
 
             payload.inst = InstId;
 
-            // if (!message.admin && (payload.type !="Card_resumed" && payload.type!="Card_lost" && payload.type !="Card_won" && payload.type !="Card_PresetInstant_activated"))
-            //     console.log(JSON.stringify(payload)+",");
+            if (!message.admin && (payload.type !="Stats_changed"))
+                console.log(JSON.stringify(payload)+",");
 
             if (message.clients) { // Loop all users
                 _.each(message.clients, function (client) {
@@ -828,7 +829,7 @@ if (redisclient) {
                         // console.log("Sending a message to client:" + client);
                         // Check if have found the user and WebSocket is open
                         if (evalUser && evalUser.socketId) {
-                            console.log("Found in instance. Sending a message to client:" + client);
+                            console.log("Found in instance. Sending a message to client:" + client +" with socketId:"+evalUser.socketId);
                             // var payloadAsString = JSON.stringify(payload);
                             // evalUser.wss.send(payloadAsString, function (sendError) {
                             //     if (sendError) {
@@ -844,8 +845,9 @@ if (redisclient) {
             else {
                 if (message.admin)
                     io.to('Administration').emit('message', payload);
-                else
+                else{
                     io.to(payload.room).emit('message', payload); // broadcast(JSON.stringify(payload), message.admin, payload.room);
+                }
             }
         }
         else {
