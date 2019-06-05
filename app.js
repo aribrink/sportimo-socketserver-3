@@ -772,7 +772,7 @@ io.on('connection', (socket, req) => {
     });
 });
 
-http.listen(3031, () => {
+http.listen(process.env.PORT || 3031, () => {
     console.log('started on port 3031');
 });
 
