@@ -638,6 +638,8 @@ io.on('connection', (socket, req) => {
 
     socket.emit('welcome', json);
 
+    var user;
+
     socket.on('register', function (payload) {
 
         console.log('-- register');
@@ -688,7 +690,7 @@ io.on('connection', (socket, req) => {
                 room: "Lobby",
                 admin: false,
                 socketId: socket.id
-            }
+            };
             LOG("User with id: " + user.uid + " has been registered to this instance from ip " + socket.ipAddress);
 
         }
