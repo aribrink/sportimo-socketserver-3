@@ -50,7 +50,7 @@ else {
         async.waterfall([
             (cbk) => {
                 async.parallel([
-                    (innerCbk) => mongoose.models.users.findById(userId, 'client', innerCbk),
+                    (innerCbk) => mongoose.models.users.findById(userId, 'client username country level picture', innerCbk),
                     (innerCbk) => mongoose.models.trn_subscriptions.find({ user: userId, state: 'active' }, innerCbk)
                 ], cbk);
             },
@@ -112,7 +112,7 @@ else {
         async.waterfall([
             (cbk) => {
                 async.parallel([
-                    (innerCbk) => mongoose.models.users.findById(userId, 'client', innerCbk),
+                    (innerCbk) => mongoose.models.users.findById(userId, 'client username country level picture', innerCbk),
                     (innerCbk) => mongoose.models.trn_subscriptions.find({ user: userId, state: 'active' }, innerCbk)
                 ], cbk);
             },
