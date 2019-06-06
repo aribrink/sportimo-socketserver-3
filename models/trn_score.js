@@ -122,7 +122,7 @@ else {
                 const subscriptions = parallelResults[1];
 
                 if (!user || subscriptions.length === 0)
-                    return cbk(null);
+                    return cbk(null, null);
 
                 const tournamentIds = _.map(subscriptions, 'tournament');
                 mongoose.model('trn_matches').find({ client: user.client, tournament: { $in: tournamentIds }, match: matchId }, cbk);
