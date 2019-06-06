@@ -676,6 +676,7 @@ io.on('connection', (socket, req) => {
                 socketId: socket.id
             };
             LOG("Administrator " + user.uname + " with id: " + user.uid + " has been registered to this instance from ip " + socket.ipAddress);
+
         }
         else {
 
@@ -694,6 +695,8 @@ io.on('connection', (socket, req) => {
             LOG("User with id: " + user.uid + " has been registered to this instance from ip " + socket.ipAddress);
 
         }
+        // Join the appropriate user room
+        socket.join(user.room);
 
         // console.log("Setting user status");
 
