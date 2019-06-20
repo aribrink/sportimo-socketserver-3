@@ -217,7 +217,7 @@ else {
                             let statsPath = {};
                             statsPath['stats.' + stat] = 1;
 
-                            return mongoose.model('users').findByIdAndUpdate(user.uid, { $inc: statsPath }, { upsert: true }, function (err, result) {
+                            return mongoose.model('users').findByIdAndUpdate(userId, { $inc: statsPath }, { upsert: true }, function (err, result) {
                                 if (err)
                                     console.log(err);
 
