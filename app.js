@@ -707,6 +707,11 @@ io.on('connection', (socket, req) => {
         });
         instUsers.push(user);
 
+
+        instUsers.forEach(x => {
+            console.log("User: " + x.uname + "| Id: " + x.uid + "| Room: " + x.room + " | SocketId: " + x.socketId);
+        })
+        
         // const json = {
         //     type: "response_info",
         //     client: user.uid,
