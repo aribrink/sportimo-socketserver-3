@@ -44,7 +44,7 @@ var mongoCreds = require('./config/mongoConfig');
 console.log("Server set environment: " + process.env.NODE_ENV);
 if (!process.env.NODE_ENV)
     process.env.NODE_ENV = "development";
-
+console.log("Set to: "+process.env.NODE_ENV);
 
 // Setup MongoDB conenction
 
