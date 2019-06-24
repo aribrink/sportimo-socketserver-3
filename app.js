@@ -711,7 +711,7 @@ io.on('connection', (socket, req) => {
         instUsers.forEach(x => {
             console.log("User: " + x.uname + "| Id: " + x.uid + "| Room: " + x.room + " | SocketId: " + x.socketId);
         })
-        
+
         // const json = {
         //     type: "response_info",
         //     client: user.uid,
@@ -845,20 +845,19 @@ if (redisclient) {
                 console.log(JSON.stringify(payload)+",");
 
             if (message.clients) { // Loop all users
+                console.log("--- Socket events has clients:")               
                 _.each(message.clients, function (client) {
+                    console.log(client);
                     if (client) {
                         const evalUser = findUser(client);
                         // console.log("Sending a message to client:" + client);
                         // Check if have found the user and WebSocket is open
                         if (evalUser && evalUser.socketId) {
                             console.log("Found in instance. Sending a message to client:" + client +" with socketId:"+evalUser.socketId);
-                            // var payloadAsString = JSON.stringify(payload);
-                            // evalUser.wss.send(payloadAsString, function (sendError) {
-                            //     if (sendError) {
-                            //         console.error(`Error sending socket payload to ${client}: ${sendError.stack}`);
-                            //         console.error(`Error Payload: ${payloadAsString}`);
-                            //     }
-                            // });
+                            var payloadAsString = JSON.stringify(payload, null, "\t");
+                            console.log(payloadAsString);
+                            
+                           
                             io.to(evalUser.socketId).emit('message', payload);
                         }
                     }
