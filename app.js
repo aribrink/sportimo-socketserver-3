@@ -536,11 +536,11 @@ var DisconnectUser = function (user) {
     // Disable it for now
     // return;
 
-    // const json = JSON.stringify({
-    //     type: "disconnect_user",
-    //     client: user.uid,
-    //     data: { "message": { "en": "You logged in from another device. We are sorry but you can only have one active connection." } }
-    // });
+    const json = JSON.stringify({
+        type: "disconnect_user",
+        client: user.uid,
+        data: { "message": { "en": "You logged in from another device. We are sorry but you can only have one active connection." } }
+    });
 
 
     // if (user.wss.readyState == WebSocket.OPEN) {
@@ -551,7 +551,7 @@ var DisconnectUser = function (user) {
     //     });
     //     user.wss.close(1008, "Duplicate connection found");
     // }
-    // removeUser(user);
+    removeUser(user);
 };
 
 // var findUser = function (id) {
@@ -632,7 +632,9 @@ io.on('connection', (socket, req) => {
         type: "response_info",
         data: "Succesfull connection to Socket server"
     });
+
     console.log('-- welcome');
+
     var ipList = req && req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(/\s*,\s*/) : [];
     socket.ipAddress = ipList.length > 0 ? ipList[ipList.length - 1] : "Unknown";
 
@@ -644,13 +646,13 @@ io.on('connection', (socket, req) => {
 
         console.log('-- register');
         // If the request is for registration
-        if (!payload.admin) {
-            var userExists = findUser(payload.uid);
+        // if (!payload.admin) {
+        //     var userExists = findUser(payload.uid);
 
-            // if (userExists) {
-            //     DisconnectUser(userExists);
-            // }
-        }
+        //     if (userExists) {
+        //         removeUser(userExists);
+        //     }
+        // }
 
         // var evtData = {
         //     sockets: false,
@@ -676,7 +678,6 @@ io.on('connection', (socket, req) => {
                 socketId: socket.id
             };
             LOG("Administrator " + user.uname + " with id: " + user.uid + " has been registered to this instance from ip " + socket.ipAddress);
-
         }
         else {
 
@@ -705,6 +706,9 @@ io.on('connection', (socket, req) => {
                 console.log(e);
             // console.log(r);
         });
+
+        // Safeguard that there is no other user with the same id in the instance
+        
         instUsers.push(user);
 
 
@@ -727,34 +731,37 @@ io.on('connection', (socket, req) => {
     socket.on('subscribe', function (payload) {
 
         console.log('-- subscribe');
-        if (!user) {
-            if (socket.uid) {
-                user = {
-                    uid: socket.uid,
-                    uname: socket.uname,
-                    room: "Lobby",
-                    admin: socket.admin,
-                    socketId: socket.id
-                };
-                users.findOneAndUpdate({ _id: user.uid }, { $set: { isOnline: true } }, { new: true }, function (e, r) {
-                    if (e)
-                        console.log(e);
-                });
-                instUsers.push(user);
-                LOG("LOST AND FOUND: " + user.uid + " | " + user.uname);
-            }
-            else {
-                LOG("Disconnecting unidentified user from instance");
-                socket.close(1008, "User is unidentified");
-                return;
-            }
-        }
+        // if (!user) {            
+        //     if (socket.uid) {                            
+
+        //         user = {
+        //             uid: socket.uid,
+        //             uname: socket.uname,
+        //             room: "Lobby",
+        //             admin: socket.admin,
+        //             socketId: socket.id
+        //         };
+        //         users.findOneAndUpdate({ _id: user.uid }, { $set: { isOnline: true } }, { new: true }, function (e, r) {
+        //             if (e)
+        //                 console.log(e);
+        //         });
+        //         instUsers.push(user);
+        //         LOG("LOST AND FOUND: " + user.uid + " | " + user.uname);
+        //     }
+        //     else {
+        //         LOG("Disconnecting unidentified user from instance");
+        //         socket.close(1008, "User is unidentified");
+        //         return;
+        //     }
+        // }
 
         try {
             user.room = payload.room;
             socket.join(user.room);
             LOG(user.uid + " with socketId:"+ user.socketId+" subscribed to:" + user.room);
-
+            instUsers.forEach(x => {
+                console.log("User: " + x.uname + "| Id: " + x.uid + "| Room: " + x.room + " | SocketId: " + x.socketId);
+            })
             // Enter leaderboard entry with user data
             leaderboard.AddLeaderboardEntry(user.uid, user.room);
 
@@ -785,7 +792,7 @@ io.on('connection', (socket, req) => {
     });
 
     socket.on('disconnect', function () {
-        console.log('user disconnected');
+        console.log('User disconnected: '+user.uname+":"+user.uid);
         removeUser(user);
     });
 
@@ -795,7 +802,7 @@ io.on('connection', (socket, req) => {
 });
 
 http.listen(process.env.PORT || 3031, () => {
-    console.log('started on port 3031');
+    console.log('started on port: '+(process.env.PORT||3031));
 });
 
 var redisclient = redis.createClient(redisCreds);
@@ -838,28 +845,25 @@ if (redisclient) {
         // Should the message be distributed by web sockets?
         if (message.sockets) {
             var payload = message.payload;
-
             payload.inst = InstId;
 
             if (!message.admin && (payload.type !="Stats_changed"))
-                console.log(JSON.stringify(payload)+",");
+                console.log(JSON.stringify(payload, null, "\t")+",");
 
-            if (message.clients) { // Loop all users
-                console.log("--- Socket events has clients:")               
+            if (message.clients) { // Loop all users                
                 _.each(message.clients, function (client) {
-                    console.log(client);
                     if (client) {
-                        const evalUser = findUser(client);
-                        // console.log("Sending a message to client:" + client);
-                        // Check if have found the user and WebSocket is open
-                        if (evalUser && evalUser.socketId) {
-                            console.log("Found in instance. Sending a message to client:" + client +" with socketId:"+evalUser.socketId);
-                            var payloadAsString = JSON.stringify(payload, null, "\t");
-                            console.log(payloadAsString);
-                            
-                           
-                            io.to(evalUser.socketId).emit('message', payload);
-                        }
+                        // const evalUser = findUser(client); 
+                        // if (evalUser && evalUser.socketId) {
+                        //     console.log("Found in instance. Sending a message to client:" + client +" with socketId:"+evalUser.socketId);
+                        //     var payloadAsString = JSON.stringify(payload, null, "\t");
+                        //     console.log(payloadAsString);                                                       
+                        //     io.to(evalUser.socketId).emit('message', payload);
+                        // }
+                        const sendUsersIds = _.filter(instUsers, { uid: id });
+                        sendUsersIds.forEach(eachUser=>{
+                            io.to(eachUser.socketId).emit('message', payload);
+                        })                                               
                     }
                 })
             }
