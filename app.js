@@ -48,7 +48,7 @@ console.log("Set to: "+process.env.NODE_ENV);
 
 // Setup MongoDB conenction
 
-var mongoConnection = 'mongodb://' + mongoCreds[process.env.NODE_ENV].user + ':' + mongoCreds[process.env.NODE_ENV].password + '@' + mongoCreds[process.env.NODE_ENV].url;
+var mongoConnection = process.env.MONGO_URL || ('mongodb://' + mongoCreds[process.env.NODE_ENV].user + ':' + mongoCreds[process.env.NODE_ENV].password + '@' + mongoCreds[process.env.NODE_ENV].url);
 
 mongoose.connect(mongoConnection, function (err, res) {
     if (err) {
@@ -627,7 +627,9 @@ let io = require('socket.io')(http, {
     }
 });
 
-io.on('connection', (socket, req) => {
+// Restricting to a namespace, in order to facilitate nginx or haproxy to root to the socket server looking at the first path fragment (/client-socket)
+// as in https://socket.io/docs/#Restricting-yourself-to-a-namespace
+io.of('/client-socket').on('connection', (socket, req) => {
     var json = ({
         type: "response_info",
         data: "Succesfull connection to Socket server"
