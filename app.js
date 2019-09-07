@@ -629,7 +629,7 @@ let io = require('socket.io')(http, {
 
 // Restricting to a namespace, in order to facilitate nginx or haproxy to root to the socket server looking at the first path fragment (/client-socket)
 // as in https://socket.io/docs/#Restricting-yourself-to-a-namespace
-io.of('/client-socket').on('connection', (socket, req) => {
+io.on('connection', (socket, req) => {
     var json = ({
         type: "response_info",
         data: "Succesfull connection to Socket server"
@@ -794,7 +794,7 @@ io.of('/client-socket').on('connection', (socket, req) => {
     });
 
     socket.on('disconnect', function () {
-        console.log('User disconnected: '+user.uname+":"+user.uid);
+        console.log('User disconnected: ' + user.uname + ":" + user.uid);
         removeUser(user);
     });
 
