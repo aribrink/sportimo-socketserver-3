@@ -849,8 +849,8 @@ if (redisclient) {
             var payload = message.payload;
             payload.inst = InstId;
 
-            if (!message.admin && (payload.type !="Stats_changed"))
-                console.log(JSON.stringify(payload, null, "\t")+",");
+            // if (!message.admin && (payload.type !="Stats_changed"))
+            //     console.log(JSON.stringify(payload, null, "\t")+",");
 
             if (message.clients) { // Loop all users                
                 _.each(message.clients, function (client) {
@@ -862,7 +862,7 @@ if (redisclient) {
                         //     console.log(payloadAsString);                                                       
                         //     io.to(evalUser.socketId).emit('message', payload);
                         // }
-                        const sendUsersIds = _.filter(instUsers, { uid: id });
+                        const sendUsersIds = _.filter(instUsers, { uid: client });
                         sendUsersIds.forEach(eachUser=>{
                             io.to(eachUser.socketId).emit('message', payload);
                         })                                               
