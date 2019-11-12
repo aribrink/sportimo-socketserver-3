@@ -385,7 +385,7 @@ var findUser = function (id) {
 };
 
 var removeUser = function (user) {
-    LOG("Removed user: " + user.uid);
+    LOG("Removed user: " + !user ? 'undefined' : user.uid);
     instUsers = _.without(instUsers, user);
 
 };
