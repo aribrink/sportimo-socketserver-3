@@ -52,7 +52,7 @@ var mongoConnection = process.env.MONGO_URL || ('mongodb://' + mongoCreds[proces
 
 mongoose.connect(mongoConnection, {
     useNewUrlParser: true,
-    useFindAndModify: true,
+    useFindAndModify: false,
     useCreateIndex: true,
     useUnifiedTopology: true
 }, function (err, res) {
