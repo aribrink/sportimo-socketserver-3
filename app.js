@@ -53,7 +53,8 @@ var mongoConnection = process.env.MONGO_URL || ('mongodb://' + mongoCreds[proces
 mongoose.connect(mongoConnection, {
     useNewUrlParser: true,
     useFindAndModify: true,
-    useCreateIndex: true
+    useCreateIndex: true,
+    useUnifiedTopology: true
 }, function (err, res) {
     if (err) {
         console.log('ERROR connecting to: ' + mongoConnection + '. ' + err);

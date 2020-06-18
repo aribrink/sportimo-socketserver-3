@@ -6,14 +6,14 @@
   "version": "0.0.22",
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "body-parser": "^1.18.3",
-    "express": "",
-    "lodash": "^4.17.10",
-    "moment": "^2.23.0",
-    "mongoose": "5.5.11",
-    "newrelic": "^4.1.5",
+    "body-parser": "^1.19.0",
+    "express": "4.17.1",
+    "lodash": "^4.17.15",
+    "moment": "^2.26.0",
+    "mongoose": "5.9.19",
+    "newrelic": "^4.13.1",
     "redis": "^2.7.1",
-    "socket.io": "^2.2.0",
+    "socket.io": "^2.3.0",
     "ws": "^5.2.0"
   },
   "engines": {
