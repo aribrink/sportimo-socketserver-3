@@ -8,7 +8,7 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "express": "4.17.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "moment": "^2.26.0",
     "mongoose": "5.9.19",
     "newrelic": "^4.13.1",
