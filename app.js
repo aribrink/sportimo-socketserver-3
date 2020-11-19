@@ -79,7 +79,7 @@ var InstId = Math.floor((Math.random() * 1000) + 1);// process.env.SERVO_ID ? pr
 
 // Initialize and connect to the Redis datastore
 
-var redisCreds = process.env.REDIS_URL || 'redis://h:pa4daaf32cd319fed3e9889211b048c2dabb1f723531c077e5bc2b8866d1a882e@ec2-63-32-222-217.eu-west-1.compute.amazonaws.com:6469';
+var redisCreds = process.env.REDIS_URL || process.env.REDISCLOUD_URL || 'redis://h:pa4daaf32cd319fed3e9889211b048c2dabb1f723531c077e5bc2b8866d1a882e@ec2-63-32-222-217.eu-west-1.compute.amazonaws.com:6469';
 
 var PublishChannel = redis.createClient(redisCreds);
 
