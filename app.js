@@ -190,7 +190,7 @@ io.on('connection', (socket, req) => {
                 admin: false,
                 socketId: socket.id
             };
-            LOG("User with id: " + user.uid + " has been registered to this instance from ip " + socket.ipAddress);
+            // LOG("User with id: " + user.uid + " has been registered to this instance from ip " + socket.ipAddress);
 
         }
         // Join the appropriate user room
@@ -207,11 +207,12 @@ io.on('connection', (socket, req) => {
         // Safeguard that there is no other user with the same id in the instance
         
         instUsers.push(user);
+        
+        console.log("[REGISTERED] User: " + user.uname + "| Id: " + user.uid + "| Room: " + user.room + " | SocketId: " + user.socketId);
 
-
-        instUsers.forEach(x => {
-            console.log("User: " + x.uname + "| Id: " + x.uid + "| Room: " + x.room + " | SocketId: " + x.socketId);
-        })
+        // instUsers.forEach(x => {
+        //     console.log("User: " + x.uname + "| Id: " + x.uid + "| Room: " + x.room + " | SocketId: " + x.socketId);
+        // })
 
         // const json = {
         //     type: "response_info",
@@ -255,10 +256,11 @@ io.on('connection', (socket, req) => {
         try {
             user.room = payload.room;
             socket.join(user.room);
-            LOG(user.uid + " with socketId:"+ user.socketId+" subscribed to:" + user.room);
-            instUsers.forEach(x => {
-                console.log("User: " + x.uname + "| Id: " + x.uid + "| Room: " + x.room + " | SocketId: " + x.socketId);
-            })
+            // LOG(user.uid + " with socketId:"+ user.socketId+" subscribed to:" + user.room);
+            console.log("[SUBSCRIBED] User: " + user.uname + "| Id: " + user.uid + "| Room: " + user.room + " | SocketId: " + user.socketId);
+            // instUsers.forEach(x => {
+            //     console.log("User: " + x.uname + "| Id: " + x.uid + "| Room: " + x.room + " | SocketId: " + x.socketId);
+            // })
             // Enter leaderboard entry with user data
             leaderboard.AddLeaderboardEntry(user.uid, user.room);
 
@@ -332,6 +334,8 @@ if (redisclient) {
             return;
         }
 
+        LOG(payload);
+
         // Should the message be distributed by web sockets?
         if (message.sockets) {
             var payload = message.payload;
@@ -366,6 +370,7 @@ if (redisclient) {
                     io.to('Administration').emit('message', payload);
                 else{
                     io.to(payload.room).emit('message', payload); // broadcast(JSON.stringify(payload), message.admin, payload.room);
+                    LOG(payload);
                 }
             }
         }
