@@ -351,9 +351,13 @@ if (redisclient) {
                         //     io.to(evalUser.socketId).emit('message', payload);
                         // }
                         const sendUsersIds = _.filter(instUsers, { uid: client });
-                        sendUsersIds.forEach(eachUser=>{
-                            io.to(eachUser.socketId).emit('message', payload);
-                        })                                               
+                        const messageRoom = payload.room || null;
+                        sendUsersIds.forEach(eachUser => {
+                            // SP3-572 Received a notification for a card played in match but with team names from another match
+                            // Send socket message if either it is not sent to a specific game room, or it is sent to a room where the user is already subscribed to
+                            if (!messageRoom || eachUser.room === messageRoom)
+                                io.to(eachUser.socketId).emit('message', payload);
+                        });                                             
                     }
                 })
             }
