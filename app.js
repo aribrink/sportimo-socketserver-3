@@ -34,7 +34,7 @@ var _ = require('lodash'),
     moment = require('moment');
 
 // New relic test
-require('newrelic');
+// require('newrelic');
 
 var mongoCreds = require('./config/mongoConfig');
 
@@ -48,7 +48,7 @@ console.log("Set to: "+process.env.NODE_ENV);
 
 // Setup MongoDB conenction
 
-var mongoConnection = process.env.MONGO_URL || ('mongodb://' + mongoCreds[process.env.NODE_ENV].user + ':' + mongoCreds[process.env.NODE_ENV].password + '@' + mongoCreds[process.env.NODE_ENV].url);
+var mongoConnection = process.env.MONGO_URL || ('mongodb+srv://bedbug:a21th21@sportimo-development-gxmiz.mongodb.net/sportimo_development?retryWrites=true&w=majority');
 
 mongoose.connect(mongoConnection, {
     useNewUrlParser: true,
@@ -79,7 +79,7 @@ var InstId = Math.floor((Math.random() * 1000) + 1);// process.env.SERVO_ID ? pr
 
 // Initialize and connect to the Redis datastore
 
-var redisCreds = process.env.REDIS_URL || process.env.REDISCLOUD_URL || 'redis://h:pa4daaf32cd319fed3e9889211b048c2dabb1f723531c077e5bc2b8866d1a882e@ec2-63-32-222-217.eu-west-1.compute.amazonaws.com:6469';
+var redisCreds = process.env.REDIS_URL || process.env.REDISCLOUD_URL || 'redis://h:pc73792211a0d8ac4fdbce316d2ac46874094552ea25026fe562888fbbd4d8843@ec2-54-72-140-111.eu-west-1.compute.amazonaws.com:15139';
 
 var PublishChannel = redis.createClient(redisCreds);
 
@@ -96,6 +96,7 @@ var LogStatus = 2;
 var ActiveGames = {};
 
 function LOG(s) {
+    // console.trace();
     if (LogStatus > 1)
         console.log(moment().format() + "[" + process.pid + "]: " + s);
 }
@@ -152,18 +153,18 @@ io.on('connection', (socket, req) => {
         data: "Succesfull connection to Socket server"
     });
 
-    console.log('-- welcome');
+    console.log('[User Welcomed]');
 
     var ipList = req && req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(/\s*,\s*/) : [];
     socket.ipAddress = ipList.length > 0 ? ipList[ipList.length - 1] : "Unknown";
-
+    
     socket.emit('welcome', json);
 
     var user;
 
     socket.on('register', function (payload) {
 
-        console.log('-- register');
+        // console.log('[User Registered]');
 
         if (payload.admin) {
             // Register the new user
@@ -228,7 +229,7 @@ io.on('connection', (socket, req) => {
 
     socket.on('subscribe', function (payload) {
 
-        console.log('-- subscribe');
+        // console.log('-- subscribe');
         // if (!user) {            
         //     if (socket.uid) {                            
 
@@ -300,7 +301,7 @@ http.listen(process.env.PORT || 3031, () => {
 var redisclient = redis.createClient(redisCreds);
 if (redisclient) {
     redisclient.on("error", function (err) {
-        LOG(err);
+        LOG("ERROR:"+err);
     });
 
     redisclient.on("subscribe", function (channel, count) {
@@ -334,7 +335,7 @@ if (redisclient) {
             return;
         }
 
-        LOG(payload);
+        // LOG("Payload:"+ message);
 
         // Should the message be distributed by web sockets?
         if (message.sockets) {
@@ -370,7 +371,7 @@ if (redisclient) {
                     io.to('Administration').emit('message', payload);
                 else{
                     io.to(payload.room).emit('message', payload); // broadcast(JSON.stringify(payload), message.admin, payload.room);
-                    LOG(payload);
+                    // LOG("Payload:"+ JSON.stringify(payload));
                 }
             }
         }
@@ -395,7 +396,7 @@ var findUser = function (id) {
 };
 
 var removeUser = function (user) {
-    LOG("Removed user: " + !user ? 'undefined' : user.uid);
+    LOG("Removed user: " + (!user ? 'undefined' : user.uid));
     instUsers = _.without(instUsers, user);
 
 };
