@@ -142,7 +142,14 @@ let io = require('socket.io')(http, {
         };
         res.writeHead(200, headers);
         res.end();
-    }
+    },
+    //cors: {
+    //    origin: "*",
+    //    methods: ["GET", "POST"],
+    //    allowedHeaders: ["my-custom-header"],
+    //    credentials: true
+    //},
+    allowEIO3: true
 });
 
 // Restricting to a namespace, in order to facilitate nginx or haproxy to root to the socket server looking at the first path fragment (/client-socket)
