@@ -5,7 +5,7 @@
   },
   "version": "0.0.22",
   "dependencies": {
-    "async": "^3.2.0",
+    "async": "^3.2.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "express": "4.17.1",
